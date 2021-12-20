@@ -10,6 +10,35 @@ TODO: describe what this plugin for
 
 TODO: add detailed information about how to install and configure this plugin
 
+### OPA Payload Request
+
+    TODO: add an example of the input request object 
+
+```json
+{
+    "attributes": {
+        "request": {
+            "http": {
+                "headers": {
+                    "accept": "*/*",
+                    "authorization": "Basic YWxpY2U6c2VjcmV0Cg==",
+                    "content-length": "0",
+                    "user-agent": "curl/7.68.0-DEV",
+                    "x-forwarded-proto": "http",
+                    "x-request-id": "1455bbb0-0623-4810-a2c6-df73ffd8863a"
+                },
+                "host": "example",
+                "id": "8306787481883314548",
+                "method": "POST",
+                "path": "/documents",
+                "protocol": "HTTP/1.1"
+            }
+        }
+    }
+}
+
+```
+
 ## Example
 
 TODO: provide an example how to configure KONG + OPA using this plugin. Perhaps reference to another repo.
