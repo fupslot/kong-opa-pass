@@ -47,9 +47,6 @@ Default values are shown in the example configuration above.
 | `request.always_pass_forward` | false | When set to `true` kong will forward the original request to the downstream event it OPA's decision is `false`. Helpful when the final decision needs to be made down the road. Additionaly the `X-OPA-Decision` header is passed back to the downstream service with the value set to `true` or `false` |
 
 
-**server.url:** http://localhost:8181/v1/data/
-__defaul:__ 
-
 ### OPA Payload Request
 
 ```json
@@ -74,7 +71,7 @@ __defaul:__
 
 ## Example
 
-TODO: provide an example how to configure KONG + OPA using this plugin. Perhaps reference to another repo.
+Reference to [opa-pass-example](https://github.com/fupslot/kong-opa-example) repo to see it work.
 
 ## Author
 
