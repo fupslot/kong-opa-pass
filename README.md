@@ -44,7 +44,7 @@ Default values are shown in the example configuration above.
 | `server.keepalive_pool` | 100 | The maximal idle timeout (ms). |
 | `request.headers_to_forward` | - | List of headers that will be forwarded to OPA as part of an input object. Above you see the default list of headers |
 | `request.body` | false | When set `true` the original request body will be forwarded to OPA as part of an input object. Only when the original request `Content-Type` set to `application/json` |
-| `request.always_pass_forward` | false | When set to `true` kong will forward the original request to the downstream event it OPA's decision is `false`. Helpful when the final decision needs to be made down the road. Additionaly the `X-OPA-Decision` header is passed back to the downstream service with the value set to `true` or `false` |
+| `request.always_pass_forward` | false | When set to `true` kong will forward the original request to the upstream event it OPA's decision is `false`. Helpful when the final decision needs to be made down the road. Additionaly the `X-OPA-Decision` header is passed back to the upstream service with the value set to `true` or `false` |
 
 
 ### OPA Payload Request
@@ -68,6 +68,57 @@ Default values are shown in the example configuration above.
 }
 
 ```
+
+## Expected OPA Response
+
+The plugin expects the policy evaluation result to be one of these types: `boolean` or `object`. If otherwise the plugin will return `Access Denied` error.
+
+### Boolean
+
+To allow the request to be forwared further, OPA policy should return:
+
+```json
+{
+    "result": true
+}
+```
+
+To restrict the access to the upstream service, OPA policy should return:
+
+```json
+{
+    "result": false
+}
+```
+
+
+### Object
+
+Make the policy decision response in a form of an object gives the additional benefits. The plugin expects the following structure:
+
+
+```json
+{
+    "result": {
+        "allow": <boolean>,
+        "status": <HTTP status code>,
+        "headers": {
+            "<header": "<value>"
+        }
+    }
+}
+```
+
+Only `result.allow` field is required.
+
+When `request.allow` is set to `true` then `request.headers` key-value pairs are injected into the original request before it is forwarded to the upstream service.
+
+When `request.allow` is set to `false` then:
+
+1. if the configuration option `request.always_pass_forward` is set to `true` then `request.headers` key-value pairs are injected into the original request before it is forwarded to the upstream service. The `X-OPA-Decision` header is set to `result.allow` value.
+
+2. if the configuration option `request.always_pass_forward` is set to `true` then `request.headers` key-value pairs are injected into the response before it is forwarded back to the client. The `X-OPA-Decision` header is set to `result.allow` value.
+
 
 ## Example
 
