@@ -51,18 +51,23 @@ local function getPayload(conf)
     return payload
 end
 
-local function getDocument(conf, payload)
-    local httpc = require("resty.http").new()
-    
-    -- todo: support tls connections
-    local schema, host, port, _ = unpack(http:parse_uri(conf.url))
-    local opa_uri = interp("${protocol}://${host}:${port}/${base_path}/${resource}", {
+local function getOpaUri(conf)
+    local schema, host, port, path = unpack(http:parse_uri(conf.server.url))
+    return interp("${protocol}://${host}:${port}/${path}", {
         protocol = schema,
         host = host,
         port = port,
-        base_path = conf.policy.base_path,
-        resource = conf.policy.resource
+        path = path,
     })
+end
+
+local function getDocument(conf)
+    local opa_uri = getOpaUri(conf)
+    local payload = getPayload(conf)
+
+    local httpc = require("resty.http").new()
+    
+    -- todo: support tls connections
 
     local headers = {
         charset = "utf-8",
@@ -86,17 +91,13 @@ local function getDocument(conf, payload)
         return error(err)
     end
 
-    return assert(cjson.decode(res.body))
+    return res, assert(cjson.decode(res.body))
 end
 
 function _M.execute(conf)
-    local ok, payload = pcall(getPayload, conf)
+    local ok, res, decision = pcall(getDocument, conf, payload)
     if not ok then
-        return kong.response.exit(500, { message = "Something went wrong" })
-    end
-
-    local ok, res = pcall(getDocument, conf, payload)
-    if not ok then
+        kong.log.err(res)
         return kong.response.exit(500, { message = "Something went wrong" })
     end
 
@@ -110,6 +111,7 @@ function _M.execute(conf)
     end
     -- todo: when the policy is found but the authorization fails, the OPA server returns a 200
 
+    print(decision)
 end
 
 return _M

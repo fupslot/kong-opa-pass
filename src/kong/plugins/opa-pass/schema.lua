@@ -18,7 +18,7 @@ return {
                                 {
                                     keepalive_timeout = {
                                         type = "number",
-                                        default = 60,
+                                        default = 60000,
                                     },
                                 },
                                 {

@@ -10,6 +10,32 @@ TODO: describe what this plugin for
 
 TODO: add detailed information about how to install and configure this plugin
 
+Example of the configuration
+
+```yml
+config:
+    server:
+        url: http://localhost:8181/v1/data/authz
+        keepalive_timeout: 60000
+        keepalive_pool: 100
+    request:
+        headers_to_forward:
+            - host
+            - authorization
+            - x-forwarded-for
+            - x-forwarded-proto
+            - x-real-ip
+            - x-forwarded-host
+            - x-forwarded-server
+            - x-forwarded-port
+            - x-forwarded-prefix
+            - x-forwarded-scheme
+            - x-forwarded-uri
+        body: false
+    policy:
+        base_path: 
+```
+
 ### OPA Payload Request
 
     TODO: add an example of the input request object 
