@@ -26,18 +26,16 @@ local function getPayload(conf)
     
     -- this is the payload that will be sent to the OPA server
     local payload = {
-        attributes = {
-            request = {
-                http = {
-                    url = original_url,
-                    headers = headers,
-                    host = origin_host,
-                    method = origin_method,
-                    path = origin_path,
-                    protocol = origin_protocol,
-                },
-                body = {},
-            }
+        request = {
+            http = {
+                url = original_url,
+                headers = headers,
+                host = origin_host,
+                method = origin_method,
+                path = origin_path,
+                protocol = origin_protocol,
+            },
+            body = {},
         }
     }
 
@@ -45,7 +43,7 @@ local function getPayload(conf)
     
     if conf.request.body then
         if kong.request.get_header("Content-Type") == "application/json" then
-            payload.attributes.request.body = kong.request.get_body("application/json")
+            payload.request.body = kong.request.get_body("application/json")
         end
     end
     

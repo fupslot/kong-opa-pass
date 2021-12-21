@@ -52,27 +52,21 @@ __defaul:__
 
 ### OPA Payload Request
 
-    TODO: add an example of the input request object 
-
 ```json
 {
-    "attributes": {
-        "request": {
-            "http": {
-                "headers": {
-                    "accept": "*/*",
-                    "authorization": "Basic YWxpY2U6c2VjcmV0Cg==",
-                    "content-length": "0",
-                    "user-agent": "curl/7.68.0-DEV",
-                    "x-forwarded-proto": "http",
-                    "x-request-id": "1455bbb0-0623-4810-a2c6-df73ffd8863a"
-                },
-                "host": "example",
-                "method": "POST",
-                "path": "/documents",
-                "protocol": "HTTP/1.1"
-            }
-        }
+    "request": {
+        "http": {
+            "headers": {
+                "authorization": "Basic YWxpY2U6c2VjcmV0Cg==",
+                "user-agent": "curl/7.68.0-DEV",
+                "x-forwarded-proto": "http",
+            },
+            "host": "example",
+            "method": "POST",
+            "path": "/documents",
+            "protocol": "HTTP/1.1"
+        },
+        "body": {}
     }
 }
 
