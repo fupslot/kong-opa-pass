@@ -4,7 +4,8 @@
 
 ## Description
 
-TODO: describe what this plugin for
+![Basic Sequence Diagram](doc/kong_opa_pass_plugin_request_flow.jpg)
+
 
 ## Configuration Example
 
@@ -100,8 +101,8 @@ Make the policy decision response in a form of an object gives the additional be
 ```json
 {
     "result": {
-        "allow": <boolean>,
-        "status": <HTTP status code>,
+        "allow": "<boolean>",
+        "status": "<HTTP status code>",
         "headers": {
             "<header": "<value>"
         }
