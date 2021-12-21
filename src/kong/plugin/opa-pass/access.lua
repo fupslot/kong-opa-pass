@@ -3,6 +3,11 @@ local cjson = require "cjson"
 
 local _M = {}
 
+-- string interpolation with named parameters in table
+local function interp(s, tab)
+    return (s:gsub('($%b{})', function(w) return tab[w:sub(3, -2)] or w end))
+end
+
 local function getPayload(conf)
     local original_url = kong.request.get_path()
 
@@ -50,6 +55,14 @@ local function getDocument(conf, payload)
     local httpc = require("resty.http").new()
     
     -- todo: support tls connections
+    local schema, host, port, _ = unpack(http:parse_uri(conf.url))
+    local opa_uri = interp("${protocol}://${host}:${port}/${base_path}/${resource}", {
+        protocol = schema,
+        host = host,
+        port = port,
+        base_path = conf.policy.base_path,
+        resource = conf.policy.resource
+    })
 
     local headers = {
         charset = "utf-8",
@@ -59,7 +72,9 @@ local function getDocument(conf, payload)
     -- todo: support authentication=token scheme
     -- see https://www.openpolicyagent.org/docs/latest/security/#authentication-and-authorization
 
-    local res, err = httpc:request_uri(conf.server.url, {
+    ngx.log(ngx.NOTICE, "opa_uri: " .. opa_uri)
+
+    local res, err = httpc:request_uri(opa_uri, {
         method = "POST",
         body = cjson.encode(payload),
         headers = headers,
