@@ -124,12 +124,15 @@ function _M.execute(conf)
                 local status = decision.result.status or 403
                 local message = decision.result.message or "Access denied"
                 
+                if type(decision.result.headers) == "table" then
+                    kong.response.set_headers(decision.result.headers)
+                end
                 return kong.response.exit(status, { message = message }) 
             end
         end
         
         if type(decision.result.headers) == "table" then
-            kon.service.request.set_headers(decision.result.headers)
+            kong.service.request.set_headers(decision.result.headers)
         end
 
         kong.service.request.set_header("X-OPA-Decision", decision.result.allow)
