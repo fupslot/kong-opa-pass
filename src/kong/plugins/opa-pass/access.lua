@@ -41,15 +41,15 @@ local function getPayload(conf)
         }
     }
 
-    kong.log.notice("OPA payload: " .. cjson.encode(payload))
-
     -- todo: parse jwt token on condition if conf.jwt_token_parse is true
-
+    
     if conf.request.body then
-        if ngx.req.get_headers()["Content-Type"] == "application/json" then
-            payload.attributes.request.body = cjson.decode(ngx.req.get_body_data())
+        if kong.request.get_header("Content-Type") == "application/json" then
+            payload.attributes.request.body = kong.request.get_body("application/json")
         end
     end
+    
+    kong.log.notice("OPA payload: " .. cjson.encode(payload))
 
     return payload
 end
