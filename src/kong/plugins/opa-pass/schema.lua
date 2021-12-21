@@ -12,6 +12,7 @@ return {
                                 {
                                     url = {
                                         type = "string",
+                                        default = "http://localhost:8181/v1/data/",
                                         required = true,
                                     },
                                 },
@@ -56,6 +57,12 @@ return {
                                     },
                                 },
                                 {
+                                    always_pass_forward = {
+                                        type = "boolean",
+                                        default = false,
+                                    },
+                                },
+                                {
                                     body = {
                                         type = "boolean",
                                         default = false,
@@ -64,26 +71,6 @@ return {
                             },
                         },
                     },
-                    {
-                        policy = {
-                            type = "record",
-                            fields = {
-                                {
-                                    base_path = {
-                                        type = "string",
-                                        default = "v1/data",
-                                        required = true,
-                                    },
-                                },
-                                {
-                                    resource = {
-                                        type = "string",
-                                        required = true,
-                                    },
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }

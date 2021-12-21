@@ -19,10 +19,10 @@ local function getPayload(conf)
         end
     end
 
-    local origin_host = ngx.req.get_headers()["Host"]
+    local origin_host = kong.request.get_forwarded_host()
     local origin_path = ngx.var.request_uri
     local origin_method = ngx.req.get_method()
-    local origin_protocol = ngx.req.get_protocol()
+    local origin_protocol = ngx.var.scheme
     
     -- this is the payload that will be sent to the OPA server
     local payload = {
@@ -35,10 +35,13 @@ local function getPayload(conf)
                     method = origin_method,
                     path = origin_path,
                     protocol = origin_protocol,
-                }
+                },
+                body = {},
             }
         }
     }
+
+    kong.log.notice("OPA payload: " .. cjson.encode(payload))
 
     -- todo: parse jwt token on condition if conf.jwt_token_parse is true
 
@@ -53,7 +56,7 @@ end
 
 local function getOpaUri(conf)
     local schema, host, port, path = unpack(http:parse_uri(conf.server.url))
-    return interp("${protocol}://${host}:${port}/${path}", {
+    return interp("${protocol}://${host}:${port}${path}", {
         protocol = schema,
         host = host,
         port = port,
@@ -81,7 +84,7 @@ local function getDocument(conf)
 
     local res, err = httpc:request_uri(opa_uri, {
         method = "POST",
-        body = cjson.encode(payload),
+        body = cjson.encode({ input = payload }),
         headers = headers,
         keepalive_timeout = conf.server.keepalive_timeout,
         keepalive_pool = conf.server.keepalive_pool,
@@ -91,17 +94,17 @@ local function getDocument(conf)
         return error(err)
     end
 
+    kong.log.notice("OPA body: ", res.body)
     return res, assert(cjson.decode(res.body))
 end
 
 function _M.execute(conf)
-    local ok, res, decision = pcall(getDocument, conf, payload)
+    local ok, res, decision = pcall(getDocument, conf)
     if not ok then
         kong.log.err(res)
         return kong.response.exit(500, { message = "Something went wrong" })
     end
 
-    -- todo: when the policy is not found, the OPA server returns a 404
     if res.status == 404 then
         return kong.response.exit(404, { message = "Policy not found" })
     end
@@ -111,7 +114,31 @@ function _M.execute(conf)
     end
     -- todo: when the policy is found but the authorization fails, the OPA server returns a 200
 
-    print(decision)
+    if not decision.result then
+        if not conf.request.always_pass_forward then
+            return kong.response.exit(403, { message = "Access denied" })
+        end
+    end
+
+    if type(decision.result) == "table" then
+        if not decision.result.allow then
+            if not conf.request.always_pass_forward then
+                local status = decision.result.status or 403
+                local message = decision.result.message or "Access denied"
+                
+                return kong.response.exit(status, { message = message }) 
+            end
+        end
+        
+        if type(decision.result.headers) == "table" then
+            kon.service.request.set_headers(decision.result.headers)
+        end
+
+        kong.service.request.set_header("X-OPA-Decision", decision.result.allow)
+    else
+        kong.service.request.set_header("X-OPA-Decision", decision.result)
+    end
+
 end
 
 return _M
