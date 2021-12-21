@@ -28,7 +28,6 @@ TODO: add detailed information about how to install and configure this plugin
                     "x-request-id": "1455bbb0-0623-4810-a2c6-df73ffd8863a"
                 },
                 "host": "example",
-                "id": "8306787481883314548",
                 "method": "POST",
                 "path": "/documents",
                 "protocol": "HTTP/1.1"
